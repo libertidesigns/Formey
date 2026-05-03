@@ -1,0 +1,2405 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formey — Lead Form Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Formey">
+<meta name="theme-color" content="#1a2d42">
+<style>
+:root {
+  --green: #7dc242;
+  --green-dark: #5fa32e;
+  --green-light: #eaf5d8;
+  --teal: #2eaac1;
+  --teal-light: #d4f0f6;
+  --navy: #1a2d42;
+  --navy-mid: #2c4460;
+  --navy-light: #e8edf3;
+  --text: #1e2d1f;
+  --text-mid: #445544;
+  --muted: #7a8f7b;
+  --bg: #f2f5f0;
+  --white: #ffffff;
+  --border: #dce8cc;
+  --border-mid: #c8ddb0;
+  --red: #e05a5a;
+  --red-light: #fdeaea;
+  --amber: #e89c2e;
+  --amber-light: #fdf3e0;
+  --shadow-sm: 0 1px 4px rgba(30,50,30,0.07);
+  --shadow: 0 3px 16px rgba(30,50,30,0.09);
+  --shadow-lg: 0 8px 32px rgba(30,50,30,0.12);
+  --sidebar-w: 240px;
+  --topbar-h: 56px;
+  --chart-bar: rgba(125,194,66,0.7);
+  /* Topbar vlastní proměnné — invertují se v dark mode */
+  --topbar-bg: #1a2d42;
+  --topbar-text: rgba(255,255,255,0.9);
+  --topbar-muted: rgba(255,255,255,0.5);
+  --topbar-btn: rgba(255,255,255,0.1);
+  --topbar-divider: rgba(255,255,255,0.12);
+}
+
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: 'Nunito Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+/* ── TOPBAR ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--navy);
+  display: flex; align-items: center;
+  padding: 0 20px;
+  z-index: 200;
+  gap: 16px;
+}
+.topbar-logo {
+  display: flex; align-items: center; gap: 0;
+  text-decoration: none; flex-shrink: 0;
+}
+.tl-wordmark {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800; font-size: 1.15rem;
+  color: #ffffff; letter-spacing: -0.02em;
+}
+.tl-wordmark .dot { color: var(--green); }
+.topbar-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.15); }
+.topbar-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600; font-size: 0.85rem;
+  color: rgba(255,255,255,0.55);
+}
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
+  width: var(--sidebar-w);
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  z-index: 100;
+  overflow-y: auto;
+}
+.sidebar-section { padding: 16px 12px 8px; }
+.sidebar-label {
+  font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--muted); padding: 0 8px; margin-bottom: 4px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 8px;
+  cursor: pointer; transition: all 0.15s;
+  font-weight: 600; font-size: 0.84rem;
+  color: var(--text-mid); text-decoration: none;
+  position: relative;
+}
+.nav-item:hover { background: var(--bg); color: var(--navy); }
+.nav-item.active { background: var(--green-light); color: var(--green-dark); }
+.nav-item.active .nav-icon { color: var(--green); }
+.nav-icon { width: 16px; height: 16px; flex-shrink: 0; color: var(--muted); }
+.nav-badge {
+  margin-left: auto;
+  background: var(--green);
+  color: white; font-size: 0.62rem; font-weight: 800;
+  padding: 1px 6px; border-radius: 10px;
+  font-family: 'Nunito', sans-serif;
+}
+.nav-badge.red { background: var(--red); }
+.sidebar-divider { height: 1px; background: var(--border); margin: 8px 12px; }
+.sidebar-footer { margin-top: auto; padding: 12px; }
+.btn-new-form {
+  width: 100%;
+  background: var(--green);
+  color: var(--white);
+  border: none; border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.84rem;
+  padding: 10px 16px;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 3px 10px rgba(125,194,66,0.3);
+}
+.btn-new-form:hover { background: var(--green-dark); box-shadow: 0 4px 14px rgba(125,194,66,0.4); }
+
+/* ── MAIN CONTENT ── */
+.main {
+  margin-left: var(--sidebar-w);
+  margin-top: var(--topbar-h);
+  height: calc(100vh - var(--topbar-h));
+  overflow-y: auto;
+}
+
+/* ── VIEWS ── */
+.view { display: none; padding: 28px 32px 80px; }
+.view.active { display: block; }
+
+/* ── FOOTER CLEARANCE — prevents fixed footer from covering content ── */
+.main { padding-bottom: 40px; }
+.steps-list { flex: 1; overflow-y: auto; padding: 10px 10px 48px; }
+.config-panel { flex: 1; overflow-y: auto; padding: 24px 24px 80px; background: var(--bg); }
+.preview-panel { width: 320px; flex-shrink: 0; background: var(--bg); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+.preview-body { flex: 1; overflow-y: auto; padding: 16px 16px 48px; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px;
+  margin-bottom: 28px;
+}
+.page-header-left {}
+.page-eyebrow {
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 4px;
+}
+.page-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem; font-weight: 800;
+  color: var(--navy); line-height: 1.2;
+}
+.page-sub { font-size: 0.84rem; color: var(--muted); margin-top: 4px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.82rem;
+  padding: 9px 18px; border-radius: 8px;
+  border: none; cursor: pointer; transition: all 0.18s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--green); color: white; box-shadow: 0 2px 8px rgba(125,194,66,0.3); }
+.btn-primary:hover { background: var(--green-dark); }
+.btn-secondary { background: var(--white); color: var(--navy); border: 1.5px solid var(--border); }
+.btn-secondary:hover { border-color: var(--green); color: var(--green-dark); }
+.btn-teal { background: var(--teal); color: white; box-shadow: 0 2px 8px rgba(46,170,193,0.3); }
+.btn-teal:hover { background: #1d8fa4; }
+.btn-danger { background: var(--red-light); color: var(--red); border: 1.5px solid #f0b0b0; }
+.btn-danger:hover { background: #fbd5d5; }
+.btn-sm { padding: 6px 12px; font-size: 0.76rem; }
+.btn-icon { padding: 7px; border-radius: 7px; background: var(--bg); border: 1.5px solid var(--border); color: var(--muted); cursor: pointer; display: grid; place-items: center; transition: all 0.15s; }
+.btn-icon:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+
+/* ── STATS ROW ── */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--white); border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-sm);
+}
+.stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.stat-icon {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: grid; place-items: center;
+}
+.stat-icon.green { background: var(--green-light); color: var(--green); }
+.stat-icon.teal { background: var(--teal-light); color: var(--teal); }
+.stat-icon.amber { background: var(--amber-light); color: var(--amber); }
+.stat-icon.navy { background: var(--navy-light); color: var(--navy); }
+.stat-trend { font-size: 0.7rem; font-weight: 700; color: var(--green); }
+.stat-val {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.9rem; font-weight: 800;
+  color: var(--navy); line-height: 1;
+  margin-bottom: 3px;
+}
+.stat-label { font-size: 0.76rem; color: var(--muted); }
+
+/* ── FORMS LIST ── */
+.forms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.form-card {
+  background: var(--white); border-radius: 12px;
+  border: 1.5px solid var(--border);
+  padding: 20px; box-shadow: var(--shadow-sm);
+  transition: all 0.2s; cursor: pointer;
+  position: relative; overflow: hidden;
+}
+.form-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; background: var(--green);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform 0.25s;
+}
+.form-card:hover { border-color: var(--green); box-shadow: var(--shadow); }
+.form-card:hover::before { transform: scaleX(1); }
+.form-card.inactive::before { background: var(--muted); }
+.fc-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.fc-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800; font-size: 0.95rem;
+  color: var(--navy); line-height: 1.3;
+}
+.fc-broker { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 0.66rem; font-weight: 700;
+  white-space: nowrap; flex-shrink: 0;
+}
+.badge-green { background: var(--green-light); color: var(--green-dark); }
+.badge-muted { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.badge-amber { background: var(--amber-light); color: var(--amber); }
+.fc-meta { display: flex; gap: 16px; margin-bottom: 14px; }
+.fc-meta-item { display: flex; align-items: center; gap: 5px; font-size: 0.76rem; color: var(--muted); }
+.fc-meta-item svg { color: var(--green); }
+.fc-actions { display: flex; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+
+/* Hide Náhled button on desktop since Live náhled panel is visible */
+body.is-desktop .editor-preview-btn { display: none !important; }
+@media (min-width: 769px) {
+  body:not(.is-mobile) .editor-preview-btn { display: none !important; }
+}
+
+/* ── EDITOR MOBILE ACTION BAR ── */
+.editor-mobile-actions {
+  display: none;
+  position: fixed;
+  bottom: 60px; /* above mobile nav */
+  left: 0; right: 0;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  padding: 10px 16px;
+  z-index: 90;
+  gap: 10px;
+  align-items: center;
+  box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+}
+/* Show mobile action bar, hide desktop buttons on mobile */
+body.is-mobile .editor-mobile-actions { display: flex; }
+body.is-mobile .editor-topbar-actions { display: none !important; }
+body.is-mobile .editor-name-input { min-width: 0; flex: 1; }
+@media (max-width: 768px) {
+  body:not(.is-desktop) .editor-mobile-actions { display: flex; }
+  body:not(.is-desktop) .editor-topbar-actions { display: none !important; }
+  body:not(.is-desktop) .editor-name-input { min-width: 0; flex: 1; }
+}
+
+/* ── EDITOR LAYOUT ── */
+#view-editor { padding: 0; display: none; }
+#view-editor.active { display: flex; flex-direction: column; height: 100%; }
+
+/* ── EDITOR TOPBAR ── */
+.editor-topbar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0;
+}
+.editor-name-input {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 1rem;
+  color: var(--navy); background: transparent;
+  border: none; outline: none; padding: 4px 8px;
+  border-radius: 6px; transition: background 0.15s;
+  min-width: 200px;
+}
+.editor-name-input:hover, .editor-name-input:focus { background: var(--bg); }
+.editor-body { display: flex; flex: 1; overflow: hidden; }
+
+/* Steps panel */
+.steps-panel {
+  width: 280px; flex-shrink: 0;
+  background: var(--white); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+  padding-bottom: 48px; /* clearance for footer */
+}
+.steps-panel-header {
+  padding: 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.steps-panel-title { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.84rem; color: var(--navy); }
+.steps-list { flex: 1; overflow-y: auto; padding: 10px 10px 0; }
+.step-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 10px; border-radius: 9px;
+  cursor: pointer; transition: all 0.15s; margin-bottom: 4px;
+  border: 1.5px solid transparent;
+}
+.step-item:hover { background: var(--bg); }
+.step-item.active { background: var(--green-light); border-color: var(--green-mid); }
+.step-num {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  display: grid; place-items: center;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.7rem;
+  color: var(--muted); flex-shrink: 0; transition: all 0.15s;
+}
+.step-item.active .step-num { background: var(--green); border-color: var(--green); color: white; }
+.step-info { flex: 1; min-width: 0; }
+.step-item-name { font-weight: 700; font-size: 0.82rem; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.step-item-type { font-size: 0.7rem; color: var(--muted); }
+.step-drag { color: var(--muted); cursor: grab; opacity: 0; transition: opacity 0.15s; }
+.step-item:hover .step-drag { opacity: 1; }
+.step-add-btn {
+  margin: 8px 10px 10px;
+  width: calc(100% - 20px);
+  background: var(--bg); border: 1.5px dashed var(--border-mid);
+  border-radius: 9px; padding: 10px;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.8rem;
+  color: var(--muted); cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.step-add-btn:hover { border-color: var(--green); color: var(--green-dark); background: var(--green-light); }
+
+/* Config panel */
+.config-section {
+  background: var(--white); border-radius: 12px;
+  border: 1px solid var(--border); padding: 20px;
+  margin-bottom: 14px; box-shadow: var(--shadow-sm);
+}
+.config-section-title {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 0.84rem; color: var(--navy);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.config-section-title svg { color: var(--green); }
+.config-row { margin-bottom: 14px; }
+.config-row:last-child { margin-bottom: 0; }
+.config-label {
+  font-size: 0.72rem; font-weight: 700;
+  color: var(--text-mid); margin-bottom: 5px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.config-input {
+  width: 100%; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; color: var(--navy);
+  font-family: 'Nunito Sans', sans-serif; font-size: 0.86rem;
+  padding: 9px 12px; outline: none; transition: all 0.18s;
+}
+.config-input:focus { border-color: var(--green); background: var(--white); box-shadow: 0 0 0 3px var(--green-light); }
+.config-input::placeholder { color: var(--muted); }
+textarea.config-input { resize: vertical; min-height: 70px; }
+
+/* Type selector */
+.type-selector { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.type-opt {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 10px 8px; text-align: center;
+  cursor: pointer; transition: all 0.15s;
+}
+.type-opt:hover { border-color: var(--green); }
+.type-opt.selected { border-color: var(--green); background: var(--green-light); }
+.type-opt svg { color: var(--muted); margin-bottom: 4px; display: block; margin-left: auto; margin-right: auto; }
+.type-opt.selected svg { color: var(--green); }
+.type-opt span { font-size: 0.7rem; font-weight: 700; color: var(--muted); display: block; }
+.type-opt.selected span { color: var(--green-dark); }
+
+/* Options editor */
+.options-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.option-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 8px 10px;
+  transition: border-color 0.15s;
+}
+.option-row:hover { border-color: var(--border-mid); }
+.option-drag { color: var(--muted); cursor: grab; flex-shrink: 0; }
+.option-input {
+  flex: 1; background: transparent; border: none; outline: none;
+  font-family: 'Nunito Sans', sans-serif; font-size: 0.84rem;
+  color: var(--navy);
+}
+.option-del { color: var(--muted); cursor: pointer; flex-shrink: 0; transition: color 0.15s; }
+.option-del:hover { color: var(--red); }
+.btn-add-opt {
+  width: 100%; background: transparent;
+  border: 1.5px dashed var(--border-mid); border-radius: 8px;
+  padding: 8px; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 0.78rem; color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.btn-add-opt:hover { border-color: var(--green); color: var(--green-dark); background: var(--green-light); }
+
+/* Toggle */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; }
+.toggle-label { font-size: 0.82rem; font-weight: 600; color: var(--text-mid); }
+.toggle {
+  width: 36px; height: 20px; border-radius: 10px;
+  background: var(--border); cursor: pointer; position: relative;
+  transition: background 0.2s; flex-shrink: 0; border: none;
+}
+.toggle::after {
+  content: ''; position: absolute;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: white; top: 3px; left: 3px;
+  transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle.on { background: var(--green); }
+.toggle.on::after { left: 19px; }
+
+/* Preview panel */
+.preview-header {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.preview-title { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.82rem; color: var(--navy); display: flex; align-items: center; gap: 6px; }
+.preview-title svg { color: var(--green); }
+.preview-phone {
+  background: var(--white); border-radius: 16px;
+  border: 2px solid var(--border); overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.preview-progress { height: 3px; background: var(--border); }
+.preview-fill { height: 100%; background: linear-gradient(to right, var(--green), var(--teal)); transition: width 0.4s; }
+.preview-content { padding: 16px; }
+.preview-tag {
+  display: inline-block;
+  background: var(--green-light); color: var(--green-dark);
+  font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; padding: 3px 8px; border-radius: 10px; margin-bottom: 8px;
+}
+.preview-q {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 0.92rem; color: var(--navy); line-height: 1.3; margin-bottom: 4px;
+}
+.preview-hint { font-size: 0.72rem; color: var(--muted); margin-bottom: 12px; line-height: 1.5; }
+.preview-option {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 9px 12px; margin-bottom: 6px;
+  font-size: 0.78rem; font-weight: 600; color: var(--text-mid);
+}
+.preview-option.first { border-color: var(--green); background: var(--green-light); color: var(--green-dark); }
+.preview-btn {
+  width: 100%; background: var(--green); color: white;
+  border: none; border-radius: 8px; padding: 10px;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.8rem;
+  margin-top: 12px; cursor: default;
+}
+.preview-field {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 9px 12px; margin-bottom: 8px;
+  font-size: 0.78rem; color: var(--muted);
+}
+.preview-field-label { font-size: 0.65rem; font-weight: 700; color: var(--text-mid); margin-bottom: 4px; }
+
+/* ── LEADS VIEW ── */
+.leads-toolbar {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px; flex-wrap: wrap;
+}
+.search-input-wrap { position: relative; flex: 1; min-width: 200px; }
+.search-input-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.search-input {
+  width: 100%; background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 8px 12px 8px 34px;
+  font-family: 'Nunito Sans', sans-serif; font-size: 0.84rem;
+  color: var(--navy); outline: none; transition: all 0.18s;
+}
+.search-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-light); }
+.filter-select {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 8px 12px;
+  font-family: 'Nunito Sans', sans-serif; font-size: 0.82rem;
+  color: var(--navy); outline: none; cursor: pointer;
+}
+.table-wrap {
+  background: var(--white); border-radius: 12px;
+  border: 1px solid var(--border); overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+table { width: 100%; border-collapse: collapse; }
+thead { background: var(--bg); }
+th {
+  text-align: left; padding: 10px 16px;
+  font-size: 0.7rem; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.82rem; color: var(--text); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--bg); }
+.lead-name { font-weight: 700; color: var(--navy); }
+.lead-contact { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; }
+.tag-green { background: var(--green-light); color: var(--green-dark); }
+.tag-teal { background: var(--teal-light); color: var(--teal); }
+.tag-amber { background: var(--amber-light); color: var(--amber); }
+.tag-muted { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+
+/* ── SHARE VIEW ── */
+.share-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.share-card {
+  background: var(--white); border-radius: 12px;
+  border: 1px solid var(--border); padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.share-card-title {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 0.9rem; color: var(--navy);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.share-card-title svg { color: var(--green); }
+.link-box {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 10px 14px;
+  margin-bottom: 12px;
+}
+.link-url { flex: 1; font-size: 0.8rem; color: var(--teal); font-weight: 600; word-break: break-all; }
+.qr-placeholder {
+  width: 160px; height: 160px; margin: 0 auto;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; display: grid; place-items: center;
+  color: var(--muted); font-size: 0.76rem; text-align: center;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(10,20,10,0.45);
+  display: grid; place-items: center; z-index: 500;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--white); border-radius: 16px;
+  padding: 28px; width: 460px; max-width: 95vw;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(16px); transition: transform 0.2s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-title { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.1rem; color: var(--navy); margin-bottom: 6px; }
+.modal-sub { font-size: 0.84rem; color: var(--muted); margin-bottom: 20px; }
+.modal-field { margin-bottom: 14px; }
+.modal-label { font-size: 0.74rem; font-weight: 700; color: var(--text-mid); margin-bottom: 5px; display: block; }
+.modal-input {
+  width: 100%; background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 8px; color: var(--navy);
+  font-family: 'Nunito Sans', sans-serif; font-size: 0.88rem;
+  padding: 10px 13px; outline: none; transition: all 0.18s;
+}
+.modal-input:focus { border-color: var(--green); background: var(--white); box-shadow: 0 0 0 3px var(--green-light); }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--navy); color: white;
+  border-radius: 10px; padding: 12px 18px;
+  font-size: 0.84rem; font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-lg); z-index: 1000;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.2,0.64,1);
+  pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast svg { color: var(--green); flex-shrink: 0; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  color: var(--muted);
+}
+.empty-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  display: grid; place-items: center;
+  margin: 0 auto 16px; color: var(--muted);
+}
+.empty-title { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; color: var(--navy); margin-bottom: 6px; }
+.empty-sub { font-size: 0.84rem; line-height: 1.6; max-width: 280px; margin: 0 auto 20px; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-mid); }
+
+/* ── VIEW TOGGLE BUTTON ── */
+.view-toggle {
+  display: flex; align-items: center;
+  background: var(--topbar-btn);
+  border-radius: 8px; padding: 3px;
+  gap: 2px;
+}
+.vt-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 6px;
+  border: none; cursor: pointer;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.72rem;
+  color: var(--topbar-muted); background: transparent;
+  transition: all 0.18s; white-space: nowrap;
+}
+.vt-btn.active { background: var(--topbar-btn); color: var(--topbar-text); }
+.vt-btn svg { flex-shrink: 0; }
+
+/* ── MOBILE NAV (bottom bar) ── */
+.mobile-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  z-index: 200;
+  align-items: stretch;
+}
+.mn-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; transition: all 0.15s;
+  border: none; background: transparent;
+  color: var(--muted); padding: 6px 4px;
+  position: relative;
+}
+.mn-item.active { color: var(--green-dark); }
+.mn-item.active::before {
+  content: ''; position: absolute; top: 0; left: 20%; right: 20%;
+  height: 2px; background: var(--green); border-radius: 0 0 2px 2px;
+}
+.mn-item svg { transition: transform 0.15s; }
+.mn-item.active svg { transform: scale(1.1); }
+.mn-label { font-size: 0.6rem; font-weight: 700; font-family: 'Nunito', sans-serif; }
+.mn-badge {
+  position: absolute; top: 6px; right: calc(50% - 18px);
+  background: var(--red); color: white;
+  font-size: 0.55rem; font-weight: 800;
+  width: 14px; height: 14px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: 'Nunito', sans-serif;
+}
+
+/* ── MOBILE SIDEBAR DRAWER ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 150; opacity: 0; transition: opacity 0.25s;
+  pointer-events: none;
+}
+.sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+/* ── MOBILE: body adjustments ── */
+body.is-mobile { --sidebar-w: 0px; }
+body.is-mobile .sidebar {
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: none; z-index: 160;
+}
+body.is-mobile .sidebar.open {
+  transform: translateX(0);
+  box-shadow: var(--shadow-lg);
+  width: 260px;
+}
+body.is-mobile .mobile-nav { display: flex; }
+body.is-mobile .main { margin-left: 0; height: calc(100vh - var(--topbar-h) - 60px); }
+body.is-mobile .topbar-user .topbar-uname { display: none; }
+body.is-mobile .topbar-divider { display: none; }
+body.is-mobile .topbar-title { display: none; }
+
+/* Mobile editor: tab-based instead of 3-column */
+body.is-mobile #view-editor.active { flex-direction: column; }
+body.is-mobile .editor-body { flex-direction: column; overflow: visible; }
+body.is-mobile .steps-panel {
+  width: 100%; border-right: none; border-bottom: 1px solid var(--border);
+  max-height: none; overflow: visible;
+}
+body.is-mobile .config-panel { overflow: visible; }
+body.is-mobile .preview-panel { display: none; }
+body.is-mobile .editor-tabs {
+  display: flex !important;
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 16px; gap: 0; flex-shrink: 0;
+  order: -1;
+}
+body.is-mobile .et-btn {
+  flex: 1; padding: 12px 8px;
+  font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.78rem;
+  color: var(--muted); background: transparent; border: none;
+  border-bottom: 2px solid transparent; cursor: pointer;
+  transition: all 0.15s; display: flex; align-items: center;
+  justify-content: center; gap: 5px;
+}
+body.is-mobile .et-btn.active { color: var(--green-dark); border-bottom-color: var(--green); }
+body.is-mobile .steps-panel[data-tab-hidden] { display: none; }
+body.is-mobile .config-panel[data-tab-hidden] { display: none; }
+
+/* Mobile: full-scroll editor panels */
+body.is-mobile #view-editor { overflow-y: auto; height: 100%; }
+body.is-mobile .editor-body { height: auto; }
+body.is-mobile .steps-panel { flex-shrink: 0; height: auto; overflow: visible; }
+body.is-mobile .config-panel { flex: none; min-height: 300px; }
+body.is-mobile .steps-list { overflow: visible; max-height: none; }
+
+/* Mobile: stats 2-col */
+body.is-mobile .stats-row { grid-template-columns: repeat(2,1fr); }
+body.is-mobile .share-grid { grid-template-columns: 1fr; }
+body.is-mobile .view { padding: 16px 16px 80px; }
+body.is-mobile .main { padding-bottom: 60px; }
+body.is-mobile .page-title { font-size: 1.2rem; }
+body.is-mobile .page-header { margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+
+/* Mobile: leads table scroll */
+body.is-mobile .table-wrap { overflow-x: auto; }
+body.is-mobile table { min-width: 600px; }
+
+/* Mobile: forms grid 1-col */
+body.is-mobile .forms-grid { grid-template-columns: 1fr; }
+
+/* Tablet breakpoint auto-mobile */
+@media (max-width: 768px) {
+  body:not(.is-desktop) { --sidebar-w: 0px; }
+  body:not(.is-desktop) .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    z-index: 160;
+  }
+  body:not(.is-desktop) .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+    width: 260px;
+  }
+  body:not(.is-desktop) .mobile-nav { display: flex; }
+  body:not(.is-desktop) .main { margin-left: 0; height: calc(100vh - var(--topbar-h) - 60px); }
+  body:not(.is-desktop) .stats-row { grid-template-columns: repeat(2,1fr); }
+  body:not(.is-desktop) .share-grid { grid-template-columns: 1fr; }
+  body:not(.is-desktop) .view { padding: 16px; }
+  body:not(.is-desktop) .page-title { font-size: 1.2rem; }
+  body:not(.is-desktop) .page-header { margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+  body:not(.is-desktop) .forms-grid { grid-template-columns: 1fr; }
+  body:not(.is-desktop) .table-wrap { overflow-x: auto; }
+  body:not(.is-desktop) table { min-width: 600px; }
+  body:not(.is-desktop) .topbar-user .topbar-uname { display: none; }
+  body:not(.is-desktop) .topbar-divider { display: none; }
+  body:not(.is-desktop) .topbar-title { display: none; }
+  body:not(.is-desktop) #view-editor.active { flex-direction: column; }
+  body:not(.is-desktop) .editor-body { flex-direction: column; overflow: visible; }
+  body:not(.is-desktop) .steps-panel { width: 100%; border-right: none; border-bottom: 1px solid var(--border); }
+  body:not(.is-desktop) .preview-panel { display: none; }
+  body:not(.is-desktop) .editor-tabs { display: flex !important; order: -1; }
+  body:not(.is-desktop) #view-editor { overflow-y: auto; height: 100%; }
+  body:not(.is-desktop) .editor-body { height: auto; }
+  body:not(.is-desktop) .steps-panel { flex-shrink: 0; height: auto; overflow: visible; }
+  body:not(.is-desktop) .config-panel { flex: none; min-height: 300px; }
+  body:not(.is-desktop) .steps-list { overflow: visible; }
+}
+
+@media (min-width: 769px) {
+  body:not(.is-mobile) .mobile-nav { display: none; }
+  body:not(.is-mobile) .editor-tabs { display: none !important; }
+}
+
+/* ── CUSTOM SELECT ── */
+.custom-select-wrap {
+  position: relative; display: inline-flex; align-items: center;
+}
+.custom-select {
+  appearance: none; -webkit-appearance: none;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 8px 36px 8px 12px;
+  font-family: 'Nunito Sans', sans-serif; font-size: 0.82rem;
+  color: var(--text); outline: none; cursor: pointer;
+  transition: all 0.18s; width: 100%;
+}
+.custom-select:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-light); }
+.custom-select:hover { border-color: var(--border-mid); }
+.custom-select-arrow {
+  position: absolute; right: 10px; pointer-events: none;
+  color: var(--muted);
+}
+
+/* ── CHART ── */
+.chart-bar-wrap {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+}
+.chart-bar {
+  width: 100%; background: var(--chart-bar);
+  border-radius: 4px 4px 0 0; min-height: 2px;
+  transition: height 0.5s cubic-bezier(0.4,0,0.2,1);
+  position: relative; cursor: default;
+}
+.chart-bar:hover { background: var(--green); }
+.chart-bar-val {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 0.7rem; color: var(--navy);
+}
+.chart-bar-label {
+  font-size: 0.65rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+/* editor-tabs hidden by default on desktop */
+.editor-tabs { display: none; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <button id="hamburgerBtn" onclick="toggleSidebar()" style="display:none;background:rgba(255,255,255,0.1);border:none;border-radius:7px;padding:7px;cursor:pointer;color:white;margin-right:4px;flex-shrink:0;">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <a href="#" class="topbar-logo" onclick="showView('dashboard');return false;">
+    <span class="tl-wordmark">Forme<span class="dot">y</span></span>
+  </a>
+  <div class="topbar-divider"></div>
+  <span class="topbar-title" id="topbarTitle">Dashboard</span>
+  <div class="topbar-right">
+  </div><!-- /topbar-right -->
+</div><!-- /topbar -->
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Přehled</div>
+    <a class="nav-item active" id="nav-dashboard" onclick="showView('dashboard');return false;" href="#">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" id="nav-forms" onclick="showView('forms');return false;" href="#">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Formuláře
+      <span class="nav-badge" id="formsCount">2</span>
+    </a>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Aktivita</div>
+    <a class="nav-item" id="nav-leads" onclick="showView('leads');return false;" href="#">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Leady
+      <span class="nav-badge red" id="leadsCount">0</span>
+    </a>
+    <a class="nav-item" id="nav-share" onclick="showView('share');return false;" href="#">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Sdílení
+    </a>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-section">
+    <a class="nav-item" id="nav-settings" onclick="showView('settings');return false;" href="#">
+      <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Nastavení
+    </a>
+  </div>
+  <div class="sidebar-footer">
+    <button class="btn-new-form" onclick="openNewFormModal()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nový formulář
+    </button>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <button class="mn-item active" id="mn-dashboard" onclick="showView('dashboard')">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    <span class="mn-label">Přehled</span>
+  </button>
+  <button class="mn-item" id="mn-forms" onclick="showView('forms')">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span class="mn-label">Formuláře</span>
+  </button>
+  <button class="mn-item" id="mn-leads" onclick="showView('leads')" style="position:relative;">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    <span class="mn-badge" id="mnLeadsBadge">7</span>
+    <span class="mn-label">Leady</span>
+  </button>
+  <button class="mn-item" id="mn-share" onclick="showView('share')">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    <span class="mn-label">Sdílení</span>
+  </button>
+  <button class="mn-item" id="mn-menu" onclick="toggleSidebar()">
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <span class="mn-label">Menu</span>
+  </button>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ── DASHBOARD ── -->
+  <div class="view active" id="view-dashboard">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-eyebrow">Přehled</div>
+        <div class="page-title">Dobrý den</div>
+        <div class="page-sub">Přehled vaší aktivity</div>
+      </div>
+      <button class="btn btn-primary" onclick="openNewFormModal()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nový formulář
+      </button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon green"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+        </div>
+        <div class="stat-val" id="stat-forms">—</div>
+        <div class="stat-label">Aktivní formuláře</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon teal"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        </div>
+        <div class="stat-val" id="stat-leads">—</div>
+        <div class="stat-label">Celkem leadů</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon amber"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        </div>
+        <div class="stat-val" id="stat-this-month">—</div>
+        <div class="stat-label">Leady tento měsíc</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top">
+          <div class="stat-icon navy"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+        </div>
+        <div class="stat-val" id="stat-last-lead">—</div>
+        <div class="stat-label">Poslední lead</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="stat-card" style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;color:var(--navy);">Leady — posledních 6 měsíců</div>
+        <div style="font-size:0.72rem;color:var(--muted);" id="chartTotal"></div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px;height:80px;" id="chartBars"></div>
+      <div style="display:flex;gap:8px;margin-top:8px;" id="chartLabels"></div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.95rem;color:var(--navy);">Vaše formuláře</div>
+      <a href="#" onclick="showView('forms');return false;" style="font-size:0.78rem;color:var(--green);font-weight:700;text-decoration:none;">Zobrazit vše →</a>
+    </div>
+    <div class="forms-grid" id="dashboardFormsList"></div>
+  </div>
+
+  <!-- ── FORMS ── -->
+  <div class="view" id="view-forms">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-eyebrow">Správa</div>
+        <div class="page-title">Formuláře</div>
+        <div class="page-sub">Vytvářejte a spravujte lead-gen formuláře</div>
+      </div>
+      <button class="btn btn-primary" onclick="openNewFormModal()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nový formulář
+      </button>
+    </div>
+    <div class="forms-grid" id="formsListMain"></div>
+  </div>
+
+  <!-- ── EDITOR ── -->
+  <div class="view" id="view-editor">
+    <div class="editor-topbar">
+      <button class="btn btn-secondary btn-sm" onclick="showView('forms')">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        Zpět
+      </button>
+      <input class="editor-name-input" id="editorFormName" value="Nový formulář" onblur="saveCurrentForm()" autocomplete="off" spellcheck="false">
+      <!-- Desktop: buttons inline — Náhled only on mobile since live preview is visible on desktop -->
+      <div class="editor-topbar-actions" id="editorTopbarActions" style="margin-left:auto;display:flex;gap:10px;align-items:center;">
+        <span id="editorSavedTag" style="font-size:0.72rem;color:var(--muted);"></span>
+        <button class="btn btn-secondary btn-sm editor-preview-btn" onclick="previewForm()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Náhled
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="saveCurrentForm(true)">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Uložit
+        </button>
+      </div>
+    </div>
+    <!-- Mobile: save/preview as sticky bottom action bar (shown only in editor) -->
+    <div class="editor-mobile-actions" id="editorMobileActions">
+      <span id="editorSavedTagMobile" style="font-size:0.72rem;color:var(--muted);flex:1;"></span>
+      <button class="btn btn-secondary btn-sm" onclick="previewForm()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Náhled
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="saveCurrentForm(true)">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Uložit
+      </button>
+    </div>
+    <div class="editor-tabs" id="editorTabs">
+        <button class="et-btn active" id="etSteps" onclick="switchEditorTab('steps')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Kroky
+        </button>
+        <button class="et-btn" id="etConfig" onclick="switchEditorTab('config')">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          Nastavení
+        </button>
+      </div>
+    <div class="editor-body">
+      <!-- Steps panel -->
+      <div class="steps-panel" id="stepsPanel">
+        <div class="steps-panel-header">
+          <span class="steps-panel-title">Kroky formuláře</span>
+          <span style="font-size:0.72rem;color:var(--muted);" id="stepsCountLabel">0 kroků</span>
+        </div>
+        <div class="steps-list" id="stepsList"></div>
+        <button class="step-add-btn" onclick="addStep()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Přidat krok
+        </button>
+      </div>
+      <!-- Config panel -->
+      <div class="config-panel" id="configPanel">
+        <div class="empty-state">
+          <div class="empty-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
+          <div class="empty-title">Vyberte krok</div>
+          <div class="empty-sub">Klikněte na krok vlevo nebo přidejte nový</div>
+        </div>
+      </div>
+      <!-- Preview panel -->
+      <div class="preview-panel">
+        <div class="preview-header">
+          <div class="preview-title">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            Live náhled
+          </div>
+        </div>
+        <div class="preview-body">
+          <div class="preview-phone" id="previewPhone">
+            <div class="preview-progress"><div class="preview-fill" id="previewFill" style="width:16%"></div></div>
+            <div class="preview-content" id="previewContent">
+              <div style="text-align:center;padding:20px;color:var(--muted);font-size:0.8rem;">Vyberte krok pro náhled</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LEADS ── -->
+  <div class="view" id="view-leads">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-eyebrow">Aktivita</div>
+        <div class="page-title">Leady</div>
+        <div class="page-sub">Všechny přijaté poptávky</div>
+      </div>
+      <button class="btn btn-secondary" onclick="exportLeads()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+    <div class="leads-toolbar">
+      <div class="search-input-wrap">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" id="leadsSearch" placeholder="Hledat podle jména, e-mailu…" oninput="filterLeads()">
+      </div>
+      <div class="custom-select-wrap">
+        <select class="custom-select" id="filterForm" onchange="filterLeads()">
+          <option value="">Všechny formuláře</option>
+        </select>
+        <svg class="custom-select-arrow" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="custom-select-wrap">
+        <select class="custom-select" id="filterZamer" onchange="filterLeads()">
+          <option value="">Všechny záměry</option>
+        </select>
+        <svg class="custom-select-arrow" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="leadsTable">
+        <thead>
+          <tr>
+            <th>Kontakt</th>
+            <th>Formulář / Záměr</th>
+            <th>Lokalita</th>
+            <th>Rozpočet</th>
+            <th>Datum</th>
+            <th style="width:110px;"></th>
+          </tr>
+        </thead>
+        <tbody id="leadsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SHARE ── -->
+  <div class="view" id="view-share">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-eyebrow">Distribuce</div>
+        <div class="page-title">Sdílení formuláře</div>
+        <div class="page-sub">Sdílejte formulář s potenciálními klienty</div>
+      </div>
+    </div>
+    <div id="shareFormPicker" style="margin-bottom:24px;">
+      <div style="font-size:0.76rem;font-weight:700;color:var(--text-mid);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.08em;">Vyberte formulář</div>
+      <div id="shareFormCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;"></div>
+    </div>
+    <div class="share-grid" id="shareGrid" style="display:none;">
+      <div class="share-card" style="grid-column:1/-1;">
+        <div class="share-card-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Přímý odkaz
+        </div>
+        <div class="link-box">
+          <span class="link-url" id="shareUrl">—</span>
+          <button class="btn-icon" onclick="copyLink()" title="Kopírovat">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+        <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;margin-bottom:14px;">Sdílejte tento odkaz přes e-mail, SMS nebo WhatsApp. Klient nemusí nic instalovat.</p>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="copyLink()">Kopírovat odkaz</button>
+          <button class="btn btn-teal btn-sm">Sdílet přes e-mail</button>
+        </div>
+      </div>
+      <div class="share-card" style="grid-column:1/-1;">
+        <div class="share-card-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Vložit na web (embed)
+        </div>
+        <div class="link-box" style="font-family:monospace;">
+          <span class="link-url" id="embedCode" style="color:var(--text-mid);font-size:0.76rem;">—</span>
+          <button class="btn-icon" onclick="copyEmbed()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS ── -->
+  <div class="view" id="view-settings">
+    <div class="page-header">
+      <div class="page-header-left">
+        <div class="page-eyebrow">Konfigurace</div>
+        <div class="page-title">Nastavení</div>
+        <div class="page-sub">Správa aplikace a dat</div>
+      </div>
+    </div>
+
+    <!-- Theme -->
+    <div class="stat-card" style="margin-bottom:14px;">
+      <div class="config-section-title" style="margin-bottom:16px;">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        Správa dat
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);">
+          <div>
+            <div style="font-weight:700;font-size:0.84rem;color:var(--navy);">Smazat všechny leady</div>
+            <div style="font-size:0.74rem;color:var(--muted);margin-top:2px;">Tato akce je nevratná</div>
+          </div>
+          <button class="btn-icon" onclick="confirmDeleteData('leads')" title="Smazat leady" style="color:var(--red);border-color:#f0b0b0;background:var(--red-light);">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          </button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border);">
+          <div>
+            <div style="font-weight:700;font-size:0.84rem;color:var(--navy);">Smazat všechny formuláře</div>
+            <div style="font-size:0.74rem;color:var(--muted);margin-top:2px;">Včetně kroků a nastavení</div>
+          </div>
+          <button class="btn-icon" onclick="confirmDeleteData('forms')" title="Smazat formuláře" style="color:var(--red);border-color:#f0b0b0;background:var(--red-light);">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          </button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--red-light);border-radius:8px;border:1px solid #f0b0b0;">
+          <div>
+            <div style="font-weight:700;font-size:0.84rem;color:var(--red);">Smazat vše</div>
+            <div style="font-size:0.74rem;color:var(--muted);margin-top:2px;">Formuláře i leady — kompletní reset</div>
+          </div>
+          <button class="btn-icon" onclick="confirmDeleteData('all')" title="Smazat vše" style="color:var(--red);border-color:#f0b0b0;background:#fbd5d5;">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="stat-card">
+      <div style="font-size:0.82rem;color:var(--muted);line-height:1.6;">
+        <strong style="color:var(--navy);">Forme<span style="color:var(--green);">y</span></strong> — Lead Form Builder<br>
+        Created by <strong style="color:var(--text-mid);">LIBERTI</strong>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ── NEW FORM MODAL ── -->
+<div class="modal-overlay" id="newFormModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">Nový formulář</div>
+    <div class="modal-sub">Vyplňte základní informace. Obsah upravíte v editoru.</div>
+    <div class="modal-field">
+      <label class="modal-label">Název formuláře *</label>
+      <input class="modal-input" id="newFormName" placeholder="např. Konzultace Praha, Prodej bytu Brno…">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Makléř</label>
+      <input class="modal-input" id="newFormBroker" placeholder="Jméno makléře">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Slug (URL)</label>
+      <input class="modal-input" id="newFormSlug" placeholder="konzultace-praha">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Zrušit</button>
+      <button class="btn btn-primary" onclick="createNewForm()">Vytvořit a otevřít editor</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── EDIT LEAD MODAL ── -->
+<div class="modal-overlay" id="editLeadModal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div class="modal-title">Upravit lead</div>
+    <div class="modal-sub">Upravte kontaktni udaje a informace o poptavce.</div>
+    <input type="hidden" id="editLeadId">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="modal-field">
+        <label class="modal-label">Jmeno a prijmeni</label>
+        <input class="modal-input" id="editLeadName" placeholder="Jan Novak">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Zamer</label>
+        <select class="modal-input" id="editLeadZamer">
+          <option>Koupe</option>
+          <option>Prodej</option>
+          <option>Pronajem</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="modal-field">
+        <label class="modal-label">Telefon</label>
+        <input class="modal-input" id="editLeadPhone" placeholder="+420 777 000 111">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">E-mail</label>
+        <input class="modal-input" id="editLeadEmail" placeholder="jan@email.cz">
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="modal-field">
+        <label class="modal-label">Lokalita</label>
+        <input class="modal-input" id="editLeadLokalita" placeholder="Praha 6">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Rozpocet</label>
+        <input class="modal-input" id="editLeadBudget" placeholder="5 000 000 Kc">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="document.getElementById('editLeadModal').classList.remove('open')">Zrusit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteLead(document.getElementById('editLeadId').value);document.getElementById('editLeadModal').classList.remove('open')">Smazat lead</button>
+      <button class="btn btn-primary" onclick="saveEditLead()">Ulozit zmeny</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg">Ulozeno</span>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  SUPABASE CONFIG
+// ══════════════════════════════════════
+const SB_URL = 'https://dtyfvxzkkyrfcvcornyq.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0eWZ2eHpra3lyZmN2Y29ybnlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc3MzIyNjUsImV4cCI6MjA5MzMwODI2NX0.5sAnryXTN9AUtKxK-895UEM7WJO__kD9_xb59KMs9iw';
+const SB_SERVICE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR0eWZ2eHpra3lyZmN2Y29ybnlxIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzczMjI2NSwiZXhwIjoyMDkzMzA4MjY1fQ.j83qw5FAHmVQzZfUKOMO6G9j3Esl_bw9Pqe0pSwfS6c';
+
+async function sbFetch(path, options = {}, useService = false) {
+  const key = useService ? SB_SERVICE : SB_ANON;
+  const res = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    headers: {
+      'apikey': key,
+      'Authorization': `Bearer ${key}`,
+      'Content-Type': 'application/json',
+      'Prefer': options.prefer || 'return=representation',
+      ...options.headers
+    },
+    ...options
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Supabase error ${res.status}: ${err}`);
+  }
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ══════════════════════════════════════
+//  DATA API
+// ══════════════════════════════════════
+async function getForms() {
+  return await sbFetch('forms?select=*&order=created_at.desc', {}, true) || [];
+}
+
+async function getFormById(id) {
+  const rows = await sbFetch(`forms?id=eq.${id}&select=*`, {}, true);
+  return rows?.[0] || null;
+}
+
+async function saveForm(form) {
+  // Build Supabase row from internal form object
+  const row = {
+    slug: form.slug,
+    name: form.name,
+    broker: form.broker || '',
+    config: { steps: form.steps || [] },
+    active: form.active !== false
+  };
+  if (form.id && !form.id.startsWith('form-')) {
+    // Update existing (uuid from Supabase)
+    return await sbFetch(`forms?id=eq.${form.id}`, {
+      method: 'PATCH', body: JSON.stringify(row), prefer: 'return=representation'
+    }, true);
+  } else {
+    // Insert new
+    return await sbFetch('forms', {
+      method: 'POST', body: JSON.stringify(row), prefer: 'return=representation'
+    }, true);
+  }
+}
+
+async function deleteFormById(id) {
+  await sbFetch(`forms?id=eq.${id}`, { method: 'DELETE', prefer: '' }, true);
+}
+
+async function getLeads() {
+  return await sbFetch('leads?select=*,forms(name,broker)&order=created_at.desc', {}, true) || [];
+}
+
+async function deleteLeadById(id) {
+  await sbFetch(`leads?id=eq.${id}`, { method: 'DELETE', prefer: '' }, true);
+}
+
+async function updateLeadById(id, data) {
+  return await sbFetch(`leads?id=eq.${id}`, {
+    method: 'PATCH', body: JSON.stringify(data), prefer: 'return=representation'
+  }, true);
+}
+
+// ══════════════════════════════════════
+//  LOADING STATE
+// ══════════════════════════════════════
+function showLoading(containerId, msg = 'Načítám...') {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);font-size:0.84rem;">
+    <div style="width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 12px;"></div>
+    ${msg}
+  </div>`;
+}
+
+// ══════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════
+const viewTitles = { dashboard:'Dashboard', forms:'Formuláře', editor:'Editor', leads:'Leady', share:'Sdílení', settings:'Nastavení' };
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const nav = document.getElementById('nav-' + name);
+  if (nav) nav.classList.add('active');
+  document.getElementById('topbarTitle').textContent = viewTitles[name] || '';
+  syncMobileNav(name);
+  closeSidebar();
+  if (name === 'dashboard') renderDashboard();
+  if (name === 'forms') renderFormsList();
+  if (name === 'leads') renderLeads();
+  if (name === 'share') renderShare();
+}
+
+// ══════════════════════════════════════
+//  RENDER FORMS
+// ══════════════════════════════════════
+function renderFormCard(form) {
+  const leadCount = form._leadCount || 0;
+  const steps = form.config?.steps || [];
+  return `
+    <div class="form-card ${form.active ? '' : 'inactive'}" onclick="openEditor('${form.id}')">
+      <div class="fc-top">
+        <div>
+          <div class="fc-name">${form.name}</div>
+          <div class="fc-broker">${form.broker}</div>
+        </div>
+        <span class="badge ${form.active ? 'badge-green' : 'badge-muted'}">
+          <svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="currentColor"/></svg>
+          ${form.active ? 'Aktivní' : 'Neaktivní'}
+        </span>
+      </div>
+      <div class="fc-meta">
+        <div class="fc-meta-item">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          ${leadCount} leadů
+        </div>
+        <div class="fc-meta-item">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          ${steps.length} kroků
+        </div>
+        <div class="fc-meta-item">
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
+          ${(form.created_at || '').slice(0,10)}
+        </div>
+      </div>
+      <div class="fc-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-secondary btn-sm" onclick="openEditor('${form.id}')">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Upravit
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="openShareFor('${form.id}')">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Sdílet
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteForm('${form.id}')">
+          <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>`;
+}
+
+async function renderDashboard() {
+  showLoading('dashboardFormsList', 'Načítám formuláře...');
+  try {
+    const [forms, leads] = await Promise.all([getForms(), getLeads()]);
+    forms.forEach(f => { f._leadCount = leads.filter(l => l.form_id === f.id).length; });
+
+    // Stats
+    document.getElementById('stat-forms').textContent = forms.filter(f => f.active).length;
+    document.getElementById('stat-leads').textContent = leads.length;
+    document.getElementById('formsCount').textContent = forms.length;
+    document.getElementById('leadsCount').textContent = leads.length;
+    if (document.getElementById('mnLeadsBadge')) document.getElementById('mnLeadsBadge').textContent = leads.length;
+
+    // This month
+    const now = new Date();
+    const thisMonth = leads.filter(l => {
+      const d = new Date(l.created_at);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }).length;
+    document.getElementById('stat-this-month').textContent = thisMonth;
+
+    // Last lead
+    if (leads.length > 0) {
+      const last = new Date(leads[0].created_at);
+      const diff = Math.floor((Date.now() - last.getTime()) / 86400000);
+      document.getElementById('stat-last-lead').textContent = diff === 0 ? 'Dnes' : diff === 1 ? 'Včera' : `${diff} dní`;
+    } else {
+      document.getElementById('stat-last-lead').textContent = '—';
+    }
+
+    // Chart — last 6 months
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const count = leads.filter(l => {
+        const ld = new Date(l.created_at);
+        return ld.getMonth() === d.getMonth() && ld.getFullYear() === d.getFullYear();
+      }).length;
+      months.push({ label: d.toLocaleString('cs-CZ', { month: 'short' }), count });
+    }
+    const maxCount = Math.max(...months.map(m => m.count), 1);
+    const barsEl = document.getElementById('chartBars');
+    const labelsEl = document.getElementById('chartLabels');
+    if (barsEl) {
+      barsEl.innerHTML = months.map(m => `
+        <div class="chart-bar-wrap">
+          <div class="chart-bar-val">${m.count}</div>
+          <div class="chart-bar" style="height:${Math.max(m.count / maxCount * 64, m.count > 0 ? 4 : 2)}px;" title="${m.count} leadů"></div>
+        </div>`).join('');
+    }
+    if (labelsEl) {
+      labelsEl.innerHTML = months.map(m => `
+        <div style="flex:1;text-align:center;font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">${m.label}</div>`).join('');
+    }
+    const total = months.reduce((s, m) => s + m.count, 0);
+    const chartTotalEl = document.getElementById('chartTotal');
+    if (chartTotalEl) chartTotalEl.textContent = `Celkem ${total} za období`;
+
+    // Forms list
+    const container = document.getElementById('dashboardFormsList');
+    if (!forms.length) {
+      container.innerHTML = '<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;min-height:200px;"><div class="empty-state"><div class="empty-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="empty-title">Zadne formulare</div><div class="empty-sub">Vytvorte prvni formular tlacitkem vpravo nahore</div><button class="btn btn-primary" onclick="openNewFormModal()">Novy formular</button></div></div>';
+    } else {
+      container.innerHTML = forms.map(f => renderFormCard(f)).join('');
+    }
+  } catch(e) {
+    document.getElementById('dashboardFormsList').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--red);">Chyba při načítání: ${e.message}</div>`;
+  }
+}
+
+async function renderFormsList() {
+  showLoading('formsListMain', 'Načítám formuláře...');
+  try {
+    const [forms, leads] = await Promise.all([getForms(), getLeads()]);
+    forms.forEach(f => { f._leadCount = leads.filter(l => l.form_id === f.id).length; });
+    document.getElementById('formsCount').textContent = forms.length;
+    const container = document.getElementById('formsListMain');
+    if (!forms.length) {
+      container.innerHTML = `<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;min-height:280px;"><div class="empty-state"><div class="empty-icon"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="empty-title">Zatim zadne formulare</div><div class="empty-sub">Kliknete na Novy formular a zacnete</div><button class="btn btn-primary" onclick="openNewFormModal()">Vytvorit prvni formular</button></div></div>`;
+    } else {
+      container.innerHTML = forms.map(f => renderFormCard(f)).join('');
+    }
+  } catch(e) {
+    document.getElementById('formsListMain').innerHTML = `<div style="text-align:center;padding:32px;color:var(--red);">Chyba: ${e.message}</div>`;
+  }
+}
+
+// ══════════════════════════════════════
+//  EDITOR
+// ══════════════════════════════════════
+let editingFormId = null;
+let activeStepIdx = null;
+let editingForm = null;
+
+const typeLabels = { single_select:'Výběr (1)', multi_select:'Výběr (více)', text_input:'Textové pole', slider:'Slider', contact:'Kontakt' };
+const typeIcons = {
+  single_select: '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>',
+  multi_select: '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>',
+  text_input: '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>',
+  slider: '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>',
+  contact: '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
+};
+
+async function openEditor(formId) {
+  editingFormId = formId;
+  // Load from Supabase
+  const form = await getFormById(formId);
+  if (!form) { showToastMsg('Formulář nenalezen'); return; }
+  // Normalize: pull steps out of config
+  editingForm = {
+    id: form.id,
+    name: form.name,
+    broker: form.broker,
+    slug: form.slug,
+    active: form.active,
+    steps: form.config?.steps || []
+  };
+  activeStepIdx = null;
+  document.getElementById('editorFormName').value = editingForm.name;
+  document.getElementById('editorSavedTag').textContent = '';
+  renderStepsList();
+  showView('editor');
+  if (editingForm.steps.length > 0) selectStep(0);
+}
+
+function renderStepsList() {
+  const list = document.getElementById('stepsList');
+  list.innerHTML = editingForm.steps.map((s, i) => `
+    <div class="step-item ${activeStepIdx === i ? 'active' : ''}" onclick="selectStep(${i})">
+      <div class="step-num">${i+1}</div>
+      <div class="step-info">
+        <div class="step-item-name">${s.question || 'Bez názvu'}</div>
+        <div class="step-item-type">${typeLabels[s.type] || s.type}</div>
+      </div>
+      <svg class="step-drag" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg>
+    </div>`).join('');
+  document.getElementById('stepsCountLabel').textContent = editingForm.steps.length + ' kroků';
+}
+
+function selectStep(idx) {
+  activeStepIdx = idx;
+  renderStepsList();
+  renderConfigPanel();
+  renderPreview();
+  const fill = Math.round(((idx) / editingForm.steps.length) * 100) + '%';
+  document.getElementById('previewFill').style.width = fill;
+  // On mobile: auto-switch to config tab after selecting a step
+  if (document.body.classList.contains('is-mobile') || window.innerWidth < 769) {
+    switchEditorTab('config');
+  }
+}
+
+function renderConfigPanel() {
+  const step = editingForm.steps[activeStepIdx];
+  if (!step) return;
+
+  const hasOptions = step.type === 'single_select' || step.type === 'multi_select';
+  const isSlider = step.type === 'slider';
+
+  const sliderMode = step.sliderMode || 'miliony';
+  const sliderHtml = isSlider ? `
+    <div class="config-section">
+      <div class="config-section-title">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        Rozsah slideru
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:${sliderMode==='custom'?'14px':'0'};">
+        <div class="type-opt ${sliderMode==='miliony'?'selected':''}" onclick="updateSliderMode('miliony')" style="padding:10px 6px;cursor:pointer;text-align:center;">
+          <div style="font-size:0.72rem;font-weight:800;color:${sliderMode==='miliony'?'var(--green-dark)':'var(--muted)'};margin-bottom:2px;">Milionový</div>
+          <div style="font-size:0.64rem;color:var(--muted);">500k – 30M Kč</div>
+        </div>
+        <div class="type-opt ${sliderMode==='mesicni'?'selected':''}" onclick="updateSliderMode('mesicni')" style="padding:10px 6px;cursor:pointer;text-align:center;">
+          <div style="font-size:0.72rem;font-weight:800;color:${sliderMode==='mesicni'?'var(--green-dark)':'var(--muted)'};margin-bottom:2px;">Měsíční</div>
+          <div style="font-size:0.64rem;color:var(--muted);">5k – 100k Kč/měs.</div>
+        </div>
+        <div class="type-opt ${sliderMode==='custom'?'selected':''}" onclick="updateSliderMode('custom')" style="padding:10px 6px;cursor:pointer;text-align:center;">
+          <div style="font-size:0.72rem;font-weight:800;color:${sliderMode==='custom'?'var(--green-dark)':'var(--muted)'};margin-bottom:2px;">Vlastní</div>
+          <div style="font-size:0.64rem;color:var(--muted);">Ručně min / max</div>
+        </div>
+      </div>
+      ${sliderMode==='custom' ? `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="config-row" style="margin-bottom:0;">
+          <div class="config-label">Minimum (Kč)</div>
+          <input class="config-input" type="number" value="${step.sliderMin||0}" oninput="updateStep('sliderMin',parseInt(this.value)||0)" placeholder="0" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="config-row" style="margin-bottom:0;">
+          <div class="config-label">Maximum (Kč)</div>
+          <input class="config-input" type="number" value="${step.sliderMax||10000000}" oninput="updateStep('sliderMax',parseInt(this.value)||10000000)" placeholder="10000000" autocomplete="off" spellcheck="false">
+        </div>
+      </div>` : ''}
+    </div>` : '';
+
+  const optionsHtml = hasOptions ? `
+    <div class="config-section">
+      <div class="config-section-title">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        Možnosti výběru
+      </div>
+      <div class="options-list" id="optionsList">
+        ${(step.options || []).map((opt, oi) => `
+          <div class="option-row" id="opt-${oi}">
+            <svg class="option-drag" width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="4" cy="3" r="1"/><circle cx="8" cy="3" r="1"/><circle cx="4" cy="6" r="1"/><circle cx="8" cy="6" r="1"/><circle cx="4" cy="9" r="1"/><circle cx="8" cy="9" r="1"/></svg>
+            <input class="option-input" value="${opt}" oninput="updateOption(${oi}, this.value)" placeholder="Text možnosti…" autocomplete="off" autocorrect="off" spellcheck="false">
+            <svg class="option-del" onclick="removeOption(${oi})" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </div>`).join('')}
+      </div>
+      <button class="btn-add-opt" onclick="addOption()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Přidat možnost
+      </button>
+    </div>` : '';
+
+  document.getElementById('configPanel').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;color:var(--navy);">
+        Krok ${activeStepIdx + 1} — Nastavení
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="deleteStep(${activeStepIdx})">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Smazat krok
+      </button>
+    </div>
+
+    <div class="config-section">
+      <div class="config-section-title">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Obsah kroku
+      </div>
+      <div class="config-row">
+        <div class="config-label">Otázka *</div>
+        <input class="config-input" value="${step.question}" oninput="updateStep('question',this.value)" placeholder="Zadejte otázku…" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="config-row">
+        <div class="config-label">Nápověda <span style="color:var(--muted);font-weight:400">(nepovinná)</span></div>
+        <input class="config-input" value="${step.hint||''}" oninput="updateStep('hint',this.value)" placeholder="Krátký popis nebo instrukce…" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="config-section">
+      <div class="config-section-title">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        Typ kroku
+      </div>
+      <div class="type-selector">
+        ${Object.keys(typeLabels).map(t => `
+          <div class="type-opt ${step.type === t ? 'selected' : ''}" onclick="updateStep('type','${t}')">
+            ${typeIcons[t]}
+            <span>${typeLabels[t]}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    ${optionsHtml}
+
+    ${sliderHtml}
+
+    <div class="config-section">
+      <div class="config-section-title">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+        Chování
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">Povinná odpověď</span>
+        <button class="toggle ${step.required !== false ? 'on' : ''}" onclick="toggleRequired()"></button>
+      </div>
+    </div>`;
+}
+
+function renderPreview() {
+  const step = editingForm.steps[activeStepIdx];
+  if (!step) return;
+  let inner = '';
+  if (step.type === 'single_select' || step.type === 'multi_select') {
+    const opts = (step.options || []).slice(0, 4).map((o, i) =>
+      `<div class="preview-option ${i===0?'first':''}">${o}</div>`).join('');
+    inner = opts + `<button class="preview-btn">Pokračovat →</button>`;
+  } else if (step.type === 'text_input') {
+    inner = `<div class="preview-field"><div class="preview-field-label">Lokalita</div>Praha, Brno…</div>
+             <button class="preview-btn">Pokračovat →</button>`;
+  } else if (step.type === 'slider') {
+    inner = `<div style="font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:800;color:var(--navy);margin-bottom:4px;">5 000 000 Kč</div>
+             <div style="height:4px;background:var(--border);border-radius:2px;margin:12px 0;position:relative;"><div style="width:20%;height:100%;background:var(--green);border-radius:2px;"></div></div>
+             <button class="preview-btn">Pokračovat →</button>`;
+  } else if (step.type === 'contact') {
+    inner = `<div class="preview-field"><div class="preview-field-label">Jméno</div>Jan Novák</div>
+             <div class="preview-field"><div class="preview-field-label">Telefon</div>+420 777…</div>
+             <div class="preview-field"><div class="preview-field-label">E-mail</div>jan@email.cz</div>
+             <button class="preview-btn" style="background:var(--teal);">Odeslat poptávku →</button>`;
+  }
+  document.getElementById('previewContent').innerHTML = `
+    <div class="preview-tag">Krok ${activeStepIdx+1} ze ${editingForm.steps.length}</div>
+    <div class="preview-q">${step.question || 'Otázka…'}</div>
+    ${step.hint ? `<div class="preview-hint">${step.hint}</div>` : ''}
+    ${inner}`;
+}
+
+function updateStep(key, val) {
+  editingForm.steps[activeStepIdx][key] = val;
+  if (key === 'type') {
+    if ((val === 'single_select' || val === 'multi_select') && !editingForm.steps[activeStepIdx].options) {
+      editingForm.steps[activeStepIdx].options = ['Možnost 1', 'Možnost 2'];
+    }
+    renderStepsList(); renderConfigPanel(); renderPreview();
+  } else if (key === 'question' || key === 'hint' || key === 'sliderMin' || key === 'sliderMax') {
+    // Text/number input — only update steps list and preview, preserves focus
+    renderStepsList(); renderPreview();
+  } else {
+    renderStepsList(); renderConfigPanel(); renderPreview();
+  }
+}
+
+function updateSliderMode(mode) {
+  editingForm.steps[activeStepIdx].sliderMode = mode;
+  if (mode === 'miliony') {
+    editingForm.steps[activeStepIdx].sliderMin = 500000;
+    editingForm.steps[activeStepIdx].sliderMax = 30000000;
+  } else if (mode === 'mesicni') {
+    editingForm.steps[activeStepIdx].sliderMin = 5000;
+    editingForm.steps[activeStepIdx].sliderMax = 100000;
+  } else if (mode === 'segmenty') {
+    if (!editingForm.steps[activeStepIdx].sliderMin) editingForm.steps[activeStepIdx].sliderMin = 500000;
+    if (!editingForm.steps[activeStepIdx].sliderMax) editingForm.steps[activeStepIdx].sliderMax = 10000000;
+    if (!editingForm.steps[activeStepIdx].sliderSegments) editingForm.steps[activeStepIdx].sliderSegments = 5;
+  }
+  renderConfigPanel();
+  renderPreview();
+}
+
+function toggleRequired() {
+  const s = editingForm.steps[activeStepIdx];
+  s.required = s.required === false ? true : false;
+  renderConfigPanel();
+}
+
+function updateOption(idx, val) { editingForm.steps[activeStepIdx].options[idx] = val; renderPreview(); }
+function addOption() { if (!editingForm.steps[activeStepIdx].options) editingForm.steps[activeStepIdx].options = []; editingForm.steps[activeStepIdx].options.push('Nová možnost'); renderConfigPanel(); renderPreview(); }
+function removeOption(idx) { editingForm.steps[activeStepIdx].options.splice(idx,1); renderConfigPanel(); renderPreview(); }
+
+function addStep() {
+  const newStep = { id:'s'+Date.now(), type:'single_select', question:'Nová otázka', hint:'', options:['Možnost 1','Možnost 2'], required:true };
+  editingForm.steps.push(newStep);
+  selectStep(editingForm.steps.length - 1);
+}
+
+function deleteStep(idx) {
+  editingForm.steps.splice(idx, 1);
+  activeStepIdx = Math.min(idx, editingForm.steps.length - 1);
+  if (editingForm.steps.length === 0) { activeStepIdx = null; document.getElementById('configPanel').innerHTML = '<div class="empty-state"><div class="empty-title">Žádné kroky</div><div class="empty-sub">Přidejte krok tlačítkem níže</div></div>'; }
+  renderStepsList();
+  if (activeStepIdx !== null) { renderConfigPanel(); renderPreview(); }
+}
+
+async function saveCurrentForm(showToast = false) {
+  editingForm.name = document.getElementById('editorFormName').value || 'Bez názvu';
+  document.getElementById('editorSavedTag').textContent = 'Ukládám...';
+  try {
+    const result = await saveForm(editingForm);
+    // If new form — update local id to uuid from Supabase
+    if (result && result[0] && result[0].id) editingForm.id = result[0].id;
+    document.getElementById('editorSavedTag').textContent = 'Uloženo ✓';
+    const mob = document.getElementById('editorSavedTagMobile');
+    if (mob) mob.textContent = 'Uloženo ✓';
+    setTimeout(() => {
+      document.getElementById('editorSavedTag').textContent = '';
+      if (mob) mob.textContent = '';
+    }, 2000);
+    if (showToast) showToastMsg('Formulář uložen');
+  } catch(e) {
+    document.getElementById('editorSavedTag').textContent = 'Chyba!';
+    showToastMsg('Chyba při ukládání: ' + e.message);
+  }
+}
+
+function previewForm() {
+  saveCurrentForm();
+  // Build a full preview modal with the actual form steps rendered
+  const steps = editingForm.steps || [];
+  if (!steps.length) { showToastMsg('Formulář nemá žádné kroky'); return; }
+
+  // Build step HTML similar to viewer
+  function buildPreviewStep(step, idx, total) {
+    const isLast = idx === total - 1;
+    const back = idx > 0 ? `<button class="pbtn-back" onclick="previewGoTo(${idx-1})">← Zpět</button>` : '';
+    let body = '';
+    if (step.type === 'single_select' || step.type === 'multi_select') {
+      body = (step.options||[]).map((o,oi) => `<div class="p-opt ${oi===0?'p-opt-sel':''}">${o}</div>`).join('');
+    } else if (step.type === 'text_input') {
+      body = `<div class="p-field"><div class="p-field-label">Lokalita</div><div style="color:var(--muted)">Praha, Brno…</div></div>`;
+    } else if (step.type === 'slider') {
+      const mode = step.sliderMode || 'miliony';
+      const mid = mode === 'mesicni' ? '25 000 Kč/měs.' : mode === 'segmenty' ? `${Math.round((step.sliderMin||500000)/1000)}k – ${Math.round((step.sliderMax||10000000)/1000000)}M Kč` : '5 000 000 Kč';
+      body = `<div style="font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:800;color:var(--navy);margin-bottom:12px;">${mid}</div><div style="height:5px;background:var(--border);border-radius:3px;"><div style="width:35%;height:100%;background:var(--green);border-radius:3px;"></div></div><div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-top:6px;"><span>Min</span><span>Max</span></div>`;
+    } else if (step.type === 'contact') {
+      body = `<div class="p-field"><div class="p-field-label">Jméno</div><div style="color:var(--muted)">Jan Novák</div></div><div class="p-field"><div class="p-field-label">Telefon</div><div style="color:var(--muted)">+420 777 000 111</div></div><div class="p-field"><div class="p-field-label">E-mail</div><div style="color:var(--muted)">jan@email.cz</div></div>`;
+    }
+    const nextLabel = isLast ? 'Odeslat poptávku' : 'Pokračovat →';
+    const nextStyle = isLast ? 'background:var(--teal);' : '';
+    return `<div class="p-step" id="ps-${idx}" style="display:${idx===0?'block':'none'}">
+      <div class="p-step-tag">Krok ${idx+1} / ${total}</div>
+      <div class="p-step-q">${step.question || 'Otázka'}</div>
+      ${step.hint ? `<div class="p-step-hint">${step.hint}</div>` : ''}
+      <div class="p-step-body">${body}</div>
+      <div class="p-step-nav">${back}<button class="pbtn-next" style="${nextStyle}" onclick="${isLast?`document.getElementById('previewModal').remove()`:`previewGoTo(${idx+1})`}">${nextLabel}</button></div>
+    </div>`;
+  }
+
+  const stepsHtml = steps.map((s,i) => buildPreviewStep(s, i, steps.length)).join('');
+  const pct = Math.round(1/steps.length*100);
+
+  const modal = document.createElement('div');
+  modal.id = 'previewModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(15,25,15,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:var(--bg);border-radius:20px;width:100%;max-width:480px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <!-- Header -->
+      <div style="background:var(--white);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;">
+        <div style="font-family:'Nunito',sans-serif;font-weight:800;font-size:0.88rem;color:var(--navy);">Náhled formuláře</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-size:0.72rem;color:var(--muted);background:var(--amber-light);color:var(--amber);padding:3px 10px;border-radius:20px;font-weight:700;">Pouze náhled — data se neposílají</span>
+          <button onclick="document.getElementById('previewModal').remove()" style="background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:0.8rem;font-weight:700;color:var(--muted);">✕ Zavřít</button>
+        </div>
+      </div>
+      <!-- Progress -->
+      <div style="height:3px;background:var(--border);flex-shrink:0;"><div id="pPreviewFill" style="height:100%;background:linear-gradient(to right,var(--green),var(--teal));transition:width 0.4s;width:${pct}%;"></div></div>
+      <!-- Steps -->
+      <div style="overflow-y:auto;padding:20px;" id="pStepsWrap">
+        <style>
+          .p-step-tag{display:inline-block;background:var(--green-light);color:var(--green-dark);font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:3px 9px;border-radius:8px;margin-bottom:10px;}
+          .p-step-q{font-family:'Nunito',sans-serif;font-size:1.2rem;font-weight:800;color:var(--navy);margin-bottom:4px;line-height:1.3;}
+          .p-step-hint{font-size:0.82rem;color:var(--muted);margin-bottom:14px;}
+          .p-step-body{margin-bottom:16px;}
+          .p-opt{background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;font-size:0.88rem;font-weight:600;color:var(--text-mid);cursor:default;}
+          .p-opt-sel{border-color:var(--green);background:var(--green-light);color:var(--navy);}
+          .p-field{background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:8px;}
+          .p-field-label{font-size:0.68rem;font-weight:700;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.06em;}
+          .p-step-nav{display:flex;gap:10px;align-items:center;padding-top:14px;border-top:1px solid var(--border);}
+          .pbtn-next{background:linear-gradient(135deg,var(--green),var(--green-dark));color:white;border:none;border-radius:9px;padding:12px 24px;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.86rem;cursor:pointer;display:flex;align-items:center;gap:6px;}
+          .pbtn-back{background:var(--white);border:1.5px solid var(--border);color:var(--muted);border-radius:9px;padding:11px 16px;font-family:'Nunito',sans-serif;font-weight:600;font-size:0.84rem;cursor:pointer;}
+        </style>
+        ${stepsHtml}
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
+  // Close on overlay click
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+}
+
+function previewGoTo(idx) {
+  const steps = editingForm.steps || [];
+  document.querySelectorAll('.p-step').forEach((el, i) => { el.style.display = i === idx ? 'block' : 'none'; });
+  const pct = Math.round((idx+1)/steps.length*100);
+  const fill = document.getElementById('pPreviewFill');
+  if (fill) fill.style.width = pct + '%';
+}
+
+// ══════════════════════════════════════
+//  LEADS
+// ══════════════════════════════════════
+let allLeads = [];
+async function renderLeads() {
+  document.getElementById('leadsBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:32px;"><div style="width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin 0.7s linear infinite;margin:0 auto 8px;"></div>Načítám...</td></tr>';
+  try {
+    allLeads = await getLeads();
+    document.getElementById('leadsCount').textContent = allLeads.length;
+    if (document.getElementById('mnLeadsBadge')) document.getElementById('mnLeadsBadge').textContent = allLeads.length;
+
+    // Populate form filter
+    const forms = await getForms();
+    const formSel = document.getElementById('filterForm');
+    if (formSel) {
+      const cur = formSel.value;
+      formSel.innerHTML = '<option value="">Všechny formuláře</option>' + forms.map(f => `<option value="${f.id}"${f.id===cur?' selected':''}>${f.name}</option>`).join('');
+    }
+
+    // Populate záměr filter dynamically from actual answer values in leads
+    const zamerSel = document.getElementById('filterZamer');
+    if (zamerSel) {
+      const cur = zamerSel.value;
+      const uniqueZamery = new Set();
+      allLeads.forEach(l => {
+        const firstStr = Object.values(l.answers||{}).find(v => typeof v === 'string' && v.length > 2);
+        if (firstStr) uniqueZamery.add(firstStr);
+      });
+      zamerSel.innerHTML = '<option value="">Všechny záměry</option>' + [...uniqueZamery].map(z => `<option value="${z}"${z===cur?' selected':''}>${z}</option>`).join('');
+    }
+
+    renderLeadsTable(allLeads);
+  } catch(e) {
+    document.getElementById('leadsBody').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--red);padding:24px;">Chyba: ${e.message}</td></tr>`;
+  }
+}
+
+function renderLeadsTable(leads) {
+  const zamerTag = { 'Koupe':'tag-green','Koupě':'tag-green','Prodej':'tag-teal','Pronajem':'tag-amber','Pronájem':'tag-amber','Pronájem (hledám)':'tag-amber','Pronájem (nabízím)':'tag-amber' };
+  const tbody = document.getElementById('leadsBody');
+  if (!leads.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px;font-size:0.84rem;">Žádné leady</td></tr>'; return; }
+  tbody.innerHTML = leads.map(l => {
+    const c = l.contact || {};
+    const a = l.answers || {};
+    const formName = l.forms?.name || '—';
+    const name = `${c.jmeno||''} ${c.prijmeni||''}`.trim() || c.name || '—';
+    const email = c.email || '';
+    const telefon = c.telefon || '';
+    // Resolve values by scanning answer keys
+    const entries = Object.entries(a);
+    const zamerEntry = entries.find(([k,v]) => typeof v === 'string' && (v.toLowerCase().includes('koup') || v.toLowerCase().includes('prodej') || v.toLowerCase().includes('pronáj') || v.toLowerCase().includes('pronaj')));
+    const zamer = zamerEntry ? zamerEntry[1] : (entries[0]?.[1] || '—');
+    const lokalitaEntry = entries.find(([k]) => k.toLowerCase().includes('nacház') || k.toLowerCase().includes('kde') || k.toLowerCase().includes('lokal'));
+    const lokalita = lokalitaEntry ? lokalitaEntry[1] : (entries[1]?.[1] || '—');
+    const budgetEntry = entries.find(([k]) => k.toLowerCase().includes('rozpo') || k.toLowerCase().includes('budget'));
+    const budget = budgetEntry ? String(budgetEntry[1]) : '—';
+    const dt = l.created_at || '';
+    const date = dt ? new Date(dt).toLocaleString('cs-CZ', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    const initials = name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase() || '?';
+    return `<tr>
+      <td style="min-width:180px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:34px;height:34px;border-radius:50%;background:var(--green-light);display:grid;place-items:center;flex-shrink:0;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.75rem;color:var(--green-dark);">${initials}</div>
+          <div style="min-width:0;">
+            <div class="lead-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;">
+              ${telefon ? `<a href="tel:${telefon}" style="color:var(--green-dark);font-weight:600;text-decoration:none;">${telefon}</a>` : ''}
+              ${email ? `<a href="mailto:${email}" style="color:var(--teal);text-decoration:none;overflow:hidden;text-overflow:ellipsis;max-width:160px;">${email}</a>` : ''}
+            </div>
+          </div>
+        </div>
+      </td>
+      <td style="min-width:140px;">
+        <div style="font-size:0.68rem;color:var(--muted);margin-bottom:4px;font-weight:600;">${formName}</div>
+        <span class="tag ${zamerTag[String(zamer)]||'tag-muted'}" style="white-space:nowrap;">${zamer}</span>
+      </td>
+      <td style="color:var(--text-mid);font-size:0.84rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${String(typeof lokalita === 'object' ? JSON.stringify(lokalita) : lokalita)}</td>
+      <td style="font-weight:700;color:var(--navy);font-size:0.84rem;white-space:nowrap;">${budget}</td>
+      <td style="color:var(--muted);font-size:0.78rem;white-space:nowrap;">${date}</td>
+      <td style="min-width:110px;">
+        <div style="display:flex;gap:4px;align-items:center;">
+          ${telefon ? `<a class="btn-icon" href="tel:${telefon}" title="Volat" style="text-decoration:none;color:var(--green-dark);" onclick="event.stopPropagation()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.45 2 2 0 0 1 3.59 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.09 6.09l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>` : ''}
+          ${email ? `<a class="btn-icon" href="mailto:${email}?subject=Re: Vase poptavka" title="E-mail" style="text-decoration:none;color:var(--teal);" onclick="event.stopPropagation()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>` : ''}
+          <button class="btn-icon" title="Upravit" onclick="openEditLead('${l.id}')"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn-icon" title="Smazat" onclick="deleteLead('${l.id}')" style="color:var(--red);"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function deleteLead(id) {
+  if (!confirm('Opravdu smazat tento lead?')) return;
+  try { await deleteLeadById(id); renderLeads(); showToastMsg('Lead smazán'); }
+  catch(e) { showToastMsg('Chyba: ' + e.message); }
+}
+
+function openEditLead(id) {
+  const lead = allLeads.find(l => l.id === id);
+  if (!lead) return;
+  const c = lead.contact || {}; const a = lead.answers || {};
+  document.getElementById('editLeadId').value = id;
+  document.getElementById('editLeadName').value = `${c.jmeno||''} ${c.prijmeni||''}`.trim() || c.name || '';
+  document.getElementById('editLeadEmail').value = c.email || '';
+  document.getElementById('editLeadPhone').value = c.telefon || '';
+  document.getElementById('editLeadZamer').value = a.zamer || a['1'] || 'Koupě';
+  document.getElementById('editLeadLokalita').value = a.lokalita || a['3'] || '';
+  document.getElementById('editLeadBudget').value = a.budget || a['4'] || '';
+  document.getElementById('editLeadModal').classList.add('open');
+}
+
+async function saveEditLead() {
+  const id = document.getElementById('editLeadId').value;
+  const lead = allLeads.find(l => l.id === id);
+  if (!lead) return;
+  const parts = document.getElementById('editLeadName').value.trim().split(' ');
+  const updated = {
+    contact: { ...lead.contact, jmeno: parts[0]||'', prijmeni: parts.slice(1).join(' ')||'', email: document.getElementById('editLeadEmail').value.trim(), telefon: document.getElementById('editLeadPhone').value.trim() },
+    answers: { ...lead.answers, zamer: document.getElementById('editLeadZamer').value, lokalita: document.getElementById('editLeadLokalita').value.trim(), budget: document.getElementById('editLeadBudget').value.trim() }
+  };
+  try { await updateLeadById(id, updated); document.getElementById('editLeadModal').classList.remove('open'); renderLeads(); showToastMsg('Lead uložen'); }
+  catch(e) { showToastMsg('Chyba: ' + e.message); }
+}
+
+function filterLeads() {
+  const q = (document.getElementById('leadsSearch')?.value || '').toLowerCase().trim();
+  const formFilter = document.getElementById('filterForm')?.value || '';
+  const zamerFilter = document.getElementById('filterZamer')?.value || '';
+
+  renderLeadsTable(allLeads.filter(l => {
+    const c = l.contact || {};
+    const a = l.answers || {};
+    // Full text search across contact and answers
+    const fullText = `${c.jmeno||''} ${c.prijmeni||''} ${c.email||''} ${c.telefon||''} ${JSON.stringify(a)}`.toLowerCase();
+    const matchQ = !q || fullText.includes(q);
+
+    // Form filter by form_id
+    const matchForm = !formFilter || l.form_id === formFilter;
+
+    // Záměr filter — find first string answer value and check if it includes the filter keyword
+    let matchZamer = true;
+    if (zamerFilter) {
+      const allAnswerValues = Object.values(a).map(v => String(v).toLowerCase());
+      const filterLower = zamerFilter.toLowerCase();
+      matchZamer = allAnswerValues.some(v => v.includes(filterLower));
+    }
+
+    return matchQ && matchForm && matchZamer;
+  }));
+}
+
+async function exportLeads() {
+  const leads = await getLeads();
+  const rows = leads.map(l => { const c=l.contact||{}; const a=l.answers||{}; return `${c.jmeno||''} ${c.prijmeni||''},${c.email||''},${c.telefon||''},${a.zamer||a['1']||''},${a.lokalita||a['3']||''},${a.budget||a['4']||''},${(l.created_at||'').slice(0,10)}`; });
+  const csv = ['Jméno,E-mail,Telefon,Záměr,Lokalita,Rozpočet,Datum',...rows].join('\n');
+  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv); a.download='leady-formey.csv'; a.click();
+  showToastMsg('CSV exportováno');
+}
+
+// ══════════════════════════════════════
+//  SHARE
+// ══════════════════════════════════════
+async function renderShare() {
+  const forms = await getForms();
+  const container = document.getElementById('shareFormCards');
+  if (!container) return;
+  if (!forms.length) {
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1;padding:32px;"><div class="empty-title">Žádné formuláře</div><div class="empty-sub">Nejprve vytvořte formulář</div></div>`;
+    return;
+  }
+  container.innerHTML = forms.map(f => `
+    <div class="form-card" id="share-card-${f.id}" onclick="selectShareForm('${f.id}')" style="cursor:pointer;transition:all 0.2s;">
+      <div class="fc-top" style="margin-bottom:8px;">
+        <div>
+          <div class="fc-name">${f.name}</div>
+          <div class="fc-broker" style="font-size:0.72rem;color:var(--muted);">${f.broker || ''}</div>
+        </div>
+        <span class="badge ${f.active ? 'badge-green' : 'badge-muted'}">
+          <svg width="6" height="6" viewBox="0 0 6 6"><circle cx="3" cy="3" r="3" fill="currentColor"/></svg>
+          ${f.active ? 'Aktivní' : 'Neaktivní'}
+        </span>
+      </div>
+      <div style="font-size:0.72rem;color:var(--muted);display:flex;align-items:center;gap:4px;">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+        ${(f.config?.steps||[]).length} kroků · /${f.slug}
+      </div>
+    </div>`).join('');
+}
+
+let selectedShareFormId = null;
+async function selectShareForm(formId) {
+  // Deselect all
+  document.querySelectorAll('[id^=share-card-]').forEach(c => {
+    c.style.borderColor = ''; c.style.boxShadow = '';
+  });
+  // Select this one
+  const card = document.getElementById('share-card-' + formId);
+  if (card) { card.style.borderColor = 'var(--green)'; card.style.boxShadow = '0 0 0 3px var(--green-light)'; }
+  selectedShareFormId = formId;
+  await updateShareView(formId);
+}
+
+async function updateShareView(formId) {
+  if (!formId) { document.getElementById('shareGrid').style.display='none'; return; }
+  const forms = await getForms();
+  const form = forms.find(f=>f.id===formId);
+  if (!form) return;
+  const base = location.origin + location.pathname.replace('builder.html','');
+  const url = `${base}index.html?slug=${form.slug}`;
+  document.getElementById('shareUrl').textContent = url;
+  document.getElementById('embedCode').textContent = `<iframe src="${url}" width="100%" height="700" frameborder="0"></iframe>`;
+  document.getElementById('shareGrid').style.display='grid';
+}
+
+function openShareFor(formId) {
+  showView('share');
+  setTimeout(async () => {
+    await renderShare();
+    selectShareForm(formId);
+  }, 100);
+}
+
+function copyLink() {
+  const url = document.getElementById('shareUrl').textContent;
+  navigator.clipboard.writeText(url).then(() => showToastMsg('Odkaz zkopírován'));
+}
+function copyEmbed() {
+  const code = document.getElementById('embedCode').textContent;
+  navigator.clipboard.writeText(code).then(() => showToastMsg('Embed kód zkopírován'));
+}
+
+// ══════════════════════════════════════
+//  MODAL & FORM CREATION
+// ══════════════════════════════════════
+function openNewFormModal() {
+  document.getElementById('newFormModal').classList.add('open');
+  document.getElementById('newFormName').value = '';
+  document.getElementById('newFormBroker').value = '';
+  document.getElementById('newFormSlug').value = '';
+  document.getElementById('newFormName').focus();
+}
+function closeModal() { document.getElementById('newFormModal').classList.remove('open'); }
+
+document.getElementById('newFormName').addEventListener('input', function() {
+  const slug = this.value.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  document.getElementById('newFormSlug').value = slug;
+});
+
+async function createNewForm() {
+  const name = document.getElementById('newFormName').value.trim();
+  if (!name) { document.getElementById('newFormName').style.borderColor='var(--red)'; return; }
+  const slug = document.getElementById('newFormSlug').value.trim() || name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') + '-' + Date.now();
+  const form = {
+    id: null,
+    name, broker: document.getElementById('newFormBroker').value.trim() || '',
+    slug, active: true,
+    steps: [
+      { id:'s1', type:'single_select', question:'Co pro vás hledáme?', hint:'Vyberte svůj záměr', options:['Chci koupit nemovitost','Chci prodat nemovitost','Hledám pronájem'], required:true },
+      { id:'s2', type:'contact', question:'Jak vás kontaktovat?', hint:'Ozveme se do 24 hodin', required:true }
+    ]
+  };
+  try {
+    const result = await saveForm(form);
+    closeModal();
+    showToastMsg('Formulář "' + name + '" vytvořen');
+    if (result && result[0]) openEditor(result[0].id);
+  } catch(e) { showToastMsg('Chyba: ' + e.message); }
+}
+
+async function deleteForm(id) {
+  if (!confirm('Opravdu smazat tento formulář?')) return;
+  try {
+    await deleteFormById(id);
+    renderFormsList();
+    renderDashboard();
+    showToastMsg('Formulář smazán');
+  } catch(e) { showToastMsg('Chyba: ' + e.message); }
+}
+
+// ══════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════
+let toastTimer;
+function showToastMsg(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ══════════════════════════════════════
+//  SIDEBAR DRAWER (mobile)
+// ══════════════════════════════════════
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar.classList.contains('open')) { closeSidebar(); return; }
+  overlay.style.display = 'block';
+  requestAnimationFrame(() => { sidebar.classList.add('open'); overlay.classList.add('open'); });
+}
+function closeSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.remove('open');
+  overlay.classList.remove('open');
+  setTimeout(() => { overlay.style.display = 'none'; }, 280);
+}
+
+// ══════════════════════════════════════
+//  MOBILE NAV SYNC
+// ══════════════════════════════════════
+function syncMobileNav(viewName) {
+  document.querySelectorAll('.mn-item').forEach(el => el.classList.remove('active'));
+  const mn = document.getElementById('mn-' + viewName);
+  if (mn) mn.classList.add('active');
+}
+
+// ══════════════════════════════════════
+//  EDITOR TABS (mobile)
+// ══════════════════════════════════════
+let activeEditorTab = 'steps';
+function switchEditorTab(tab) {
+  activeEditorTab = tab;
+  document.getElementById('etSteps').classList.toggle('active', tab === 'steps');
+  document.getElementById('etConfig').classList.toggle('active', tab === 'config');
+  const stepsPanel = document.getElementById('stepsPanel');
+  const configPanel = document.getElementById('configPanel');
+  if (tab === 'steps') {
+    stepsPanel.removeAttribute('data-tab-hidden');
+    configPanel.setAttribute('data-tab-hidden', '1');
+  } else {
+    configPanel.removeAttribute('data-tab-hidden');
+    stepsPanel.setAttribute('data-tab-hidden', '1');
+  }
+}
+
+// ══════════════════════════════════════
+//  VIEW MODE — FULLY AUTOMATIC
+// ══════════════════════════════════════
+function applyMode(isMobile) {
+  document.body.classList.toggle('is-mobile', isMobile);
+  document.body.classList.toggle('is-desktop', !isMobile);
+  const hamburger = document.getElementById('hamburgerBtn');
+  if (isMobile) {
+    if (hamburger) hamburger.style.cssText = 'display:flex;align-items:center;background:rgba(255,255,255,0.1);border:none;border-radius:7px;padding:7px;cursor:pointer;color:white;margin-right:4px;flex-shrink:0;';
+    if (document.getElementById('view-editor').classList.contains('active')) switchEditorTab('steps');
+  } else {
+    if (hamburger) hamburger.style.display = 'none';
+    closeSidebar();
+  }
+}
+
+function detectAndApplyMode() { applyMode(window.innerWidth < 769); }
+
+// ══════════════════════════════════════
+//  SETTINGS — DATA DELETION
+// ══════════════════════════════════════
+async function confirmDeleteData(type) {
+  const msgs = {
+    leads: 'Opravdu smazat VŠECHNY leady? Tato akce je nevratná.',
+    forms: 'Opravdu smazat VŠECHNY formuláře? Leady zůstanou.',
+    all: 'Opravdu smazat VŠE — formuláře i leady? Tato akce je nevratná.'
+  };
+  if (!confirm(msgs[type])) return;
+
+  try {
+    if (type === 'leads' || type === 'all') {
+      await sbFetch('leads?id=neq.00000000-0000-0000-0000-000000000000', { method: 'DELETE', prefer: '' }, true);
+    }
+    if (type === 'forms' || type === 'all') {
+      await sbFetch('forms?id=neq.00000000-0000-0000-0000-000000000000', { method: 'DELETE', prefer: '' }, true);
+    }
+    showToastMsg('Data smazána');
+    renderDashboard();
+  } catch(e) { showToastMsg('Chyba: ' + e.message); }
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+renderDashboard();
+detectAndApplyMode();
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(detectAndApplyMode, 150);
+});
+
+// ── PWA ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+const PWA_KEY = 'formey_pwa_dismissed';
+let deferredInstallPrompt = null;
+function isStandalone(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone; }
+function isIOSDevice(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream; }
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!isStandalone() && localStorage.getItem(PWA_KEY) !== '1') {
+    setTimeout(() => document.getElementById('builderInstallBanner')?.classList.add('show'), 1500);
+  }
+});
+
+function installApp() {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then(r => {
+    if (r.outcome === 'accepted') { try { localStorage.setItem(PWA_KEY,'1'); } catch{} }
+    deferredInstallPrompt = null;
+    document.getElementById('builderInstallBanner')?.classList.remove('show');
+  });
+}
+function dismissInstall() {
+  document.getElementById('builderInstallBanner')?.classList.remove('show');
+  try { localStorage.setItem(PWA_KEY,'1'); } catch{}
+}
+
+// iOS
+if (isIOSDevice() && !isStandalone() && localStorage.getItem(PWA_KEY) !== '1') {
+  setTimeout(() => document.getElementById('builderIOSBanner')?.classList.add('show'), 2000);
+}
+</script>
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+/* Install banners */
+.install-banner {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;
+  background: var(--navy); color: white;
+  padding: 12px 20px; display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.25);
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.install-banner.show { transform: translateY(0); }
+.install-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--green); display: grid; place-items: center; flex-shrink: 0; font-family:'Nunito',sans-serif; font-weight:800; font-size:1rem; color:var(--navy); }
+.install-text { flex:1; }
+.install-text strong { display:block; font-size:0.86rem; font-weight:700; }
+.install-text span { font-size:0.72rem; color:rgba(255,255,255,0.65); }
+.install-btn { background:var(--green); color:var(--navy); border:none; border-radius:8px; padding:9px 16px; font-family:'Nunito',sans-serif; font-weight:800; font-size:0.8rem; cursor:pointer; flex-shrink:0; white-space:nowrap; }
+.install-dismiss { background:none; border:none; color:rgba(255,255,255,0.4); font-size:1.1rem; cursor:pointer; padding:4px; flex-shrink:0; }
+.ios-install-banner { border-radius:14px 14px 0 0; flex-direction:column; align-items:flex-start; gap:8px; padding:16px 20px 20px; }
+.ios-install-banner .ios-close { position:absolute; top:12px; right:16px; background:none; border:none; color:rgba(255,255,255,0.45); font-size:1.1rem; cursor:pointer; }
+</style>
+
+<!-- PWA Install Banner: Android/Chrome -->
+<div class="install-banner" id="builderInstallBanner">
+  <div class="install-icon">F</div>
+  <div class="install-text">
+    <strong>Přidat Formey na plochu</strong>
+    <span>Rychlý přístup bez prohlížeče</span>
+  </div>
+  <button class="install-btn" onclick="installApp()">Instalovat</button>
+  <button class="install-dismiss" onclick="dismissInstall()">×</button>
+</div>
+
+<!-- PWA Install Banner: iOS Safari -->
+<div class="install-banner ios-install-banner" id="builderIOSBanner" style="position:relative;">
+  <button class="ios-close" onclick="this.closest('.install-banner').classList.remove('show');try{localStorage.setItem('formey_pwa_dismissed','1')}catch{}">×</button>
+  <strong style="font-size:0.88rem;font-weight:700;">Přidat na plochu</strong>
+  <span style="font-size:0.8rem;color:rgba(255,255,255,0.7);line-height:1.5;">Klepněte na <strong>Sdílet</strong> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="vertical-align:middle"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> a poté <strong>Přidat na plochu</strong></span>
+</div>
+
+<footer style="position:fixed;bottom:0;left:var(--sidebar-w);right:0;background:var(--white);box-shadow:0 -1px 8px rgba(0,0,0,0.05);padding:8px 20px;text-align:center;z-index:50;transition:left 0.3s;">
+  <span style="font-size:0.68rem;color:var(--muted);letter-spacing:0.06em;">Created by <strong style="color:var(--text-mid);font-weight:700;">LIBERTI</strong></span>
+</footer>
+</body>
+</html>
